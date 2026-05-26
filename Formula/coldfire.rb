@@ -90,6 +90,19 @@ class Coldfire < Formula
     virtualenv_install_with_resources
   end
 
+  def caveats
+    <<~EOS
+      Before uninstalling Coldfire, run the cleanup command to stop services
+      and remove config, credentials, and any tools Coldfire installed:
+
+        coldfire uninstall
+
+      Then uninstall the formula:
+
+        brew uninstall coldfire
+    EOS
+  end
+
   test do
     system bin/"coldfire", "--help"
   end
