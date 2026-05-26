@@ -25,11 +25,11 @@ class Coldfire < Formula
 
   desc "Local LLM inference CLI for macOS"
   homepage "https://getcoldfire.com"
-  url "https://github.com/getcoldfire/coldfire/archive/refs/tags/v0.2.21.tar.gz",
+  url "https://github.com/getcoldfire/coldfire/archive/refs/tags/v0.2.22.tar.gz",
       using: ColdFirePrivateDownloadStrategy
-  sha256 "6bbf29c8db53984d6208d94700ba299250b27914b2ccd92cfe2745fa6de6540e"
+  sha256 "dbeae78dde7aa91d2f62a1b53ee77fe7166b2a12ee7e9bf8f167b56512a75587"
   license "MIT"
-  version "0.2.21"
+  version "0.2.22"
 
   depends_on "python@3.13"
   depends_on :macos
