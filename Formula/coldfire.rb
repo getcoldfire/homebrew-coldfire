@@ -1,10 +1,33 @@
+class ColdFirePrivateDownloadStrategy < CurlDownloadStrategy
+  def initialize(url, name, version, **meta)
+    super
+    @owner = "getcoldfire"
+    @repo = "coldfire"
+    @ref = "v#{version}"
+  end
+
+  def _fetch(url:, resolved_url:, timeout:)
+    token = ENV["HOMEBREW_GITHUB_API_TOKEN"]
+    raise CurlDownloadStrategyError, "HOMEBREW_GITHUB_API_TOKEN must be set to install this formula." unless token
+
+    api_url = "https://api.github.com/repos/#{@owner}/#{@repo}/tarball/#{@ref}"
+    curl_download api_url,
+                  "--header", "Authorization: Bearer #{token}",
+                  "--header", "Accept: application/vnd.github.v3+json",
+                  "--location",
+                  to: temporary_path,
+                  timeout: timeout
+  end
+end
+
 class Coldfire < Formula
   include Language::Python::Virtualenv
 
   desc "Local LLM inference CLI for macOS"
   homepage "https://getcoldfire.com"
-  url "https://github.com/getcoldfire/coldfire/archive/refs/tags/v0.2.9.tar.gz"
-  sha256 "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5"
+  url "https://github.com/getcoldfire/coldfire/archive/refs/tags/v0.2.9.tar.gz",
+      using: ColdFirePrivateDownloadStrategy
+  sha256 "4ab5d455cfcf529b97549d35f5d33ececfafeb37cd78dda24817b4d65b5f49a4"
   license "MIT"
   version "0.2.9"
 
