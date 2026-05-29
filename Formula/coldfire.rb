@@ -25,11 +25,11 @@ class Coldfire < Formula
 
   desc "Local LLM inference CLI for macOS"
   homepage "https://getcoldfire.com"
-  url "https://github.com/getcoldfire/coldfire/archive/refs/tags/v0.2.58.tar.gz",
+  url "https://github.com/getcoldfire/coldfire/archive/refs/tags/v0.2.59.tar.gz",
       using: ColdFirePrivateDownloadStrategy
-  sha256 "1750a144334065cedec277b45b05b59d98e68b871ed150d46937b184af24013d"
+  sha256 "444940ca3898fe61f162212947ccfabecc26915994b426d95a00c5aa2acd0f47"
   license "MIT"
-  version "0.2.58"
+  version "0.2.59"
 
   depends_on "python@3.13"
   depends_on :macos
@@ -87,6 +87,11 @@ class Coldfire < Formula
   resource "pygments" do
     url "https://files.pythonhosted.org/packages/f4/7e/a72dd26f3b0f4f2bf1dd8923c85f7ceb43172af56d63c7383eb62b332364/pygments-2.20.0-py3-none-any.whl"
     sha256 "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176"
+  end
+
+  resource "python-socks" do
+    url "https://files.pythonhosted.org/packages/15/fe/9a58cb6eec633ff6afae150ca53c16f8cc8b65862ccb3d088051efdfceb7/python_socks-2.8.1-py3-none-any.whl"
+    sha256 "28232739c4988064e725cdbcd15be194743dd23f1c910f784163365b9d7be035"
   end
 
   resource "pyyaml" do
