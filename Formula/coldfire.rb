@@ -115,7 +115,9 @@ class Coldfire < Formula
   end
 
   def install
-    virtualenv_install_with_resources
+    cd "cli" do
+      virtualenv_install_with_resources
+    end
     (bin/"cf").unlink
   end
 
