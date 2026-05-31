@@ -115,9 +115,9 @@ class Coldfire < Formula
   end
 
   def install
-    cd "cli" do
-      virtualenv_install_with_resources
-    end
+    venv = virtualenv_create(libexec, "python@3.13")
+    venv.pip_install resources
+    venv.pip_install_and_link buildpath/"cli"
     (bin/"cf").unlink
   end
 
