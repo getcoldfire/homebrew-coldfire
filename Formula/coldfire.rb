@@ -25,11 +25,11 @@ class Coldfire < Formula
 
   desc "Local LLM inference CLI for macOS"
   homepage "https://getcoldfire.com"
-  url "https://github.com/getcoldfire/coldfire/archive/refs/tags/v0.2.65.tar.gz",
+  url "https://github.com/getcoldfire/coldfire/archive/refs/tags/v0.2.66.tar.gz",
       using: ColdFirePrivateDownloadStrategy
-  sha256 "0ac49538b5cac70660b21ebf2e393f4c10f596be8d837fb7f98b12e08316998e"
+  sha256 "a3692233bc258e07a0ca3b6f479ac1ab5307209262e2796fd1b7b9e025dc6252"
   license "MIT"
-  version "0.2.65"
+  version "0.2.66"
 
   depends_on "python@3.13"
   depends_on :macos
@@ -107,6 +107,11 @@ class Coldfire < Formula
   resource "shellingham" do
     url "https://files.pythonhosted.org/packages/e0/f9/0595336914c5619e5f28a1fb793285925a8cd4b432c9da0a987836c7f822/shellingham-1.5.4-py2.py3-none-any.whl"
     sha256 "7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686"
+  end
+
+  resource "socksio" do
+    url "https://files.pythonhosted.org/packages/37/c3/6eeb6034408dac0fa653d126c9204ade96b819c936e136c5e8a6897eee9c/socksio-1.0.0-py3-none-any.whl"
+    sha256 "95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3"
   end
 
   resource "typer" do
