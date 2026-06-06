@@ -3,8 +3,8 @@ class ColdfireMlxServer < Formula
 
   desc "License-clean MLX-LM inference server with OpenAI-compatible API"
   homepage "https://github.com/getcoldfire/mlx-openai-server"
-  url "https://github.com/getcoldfire/mlx-openai-server/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "2edd408fec8503722ebed60270300e97c319b305a461fc9771b60207a9ee3b3d"
+  url "https://github.com/getcoldfire/mlx-openai-server/archive/refs/tags/v0.1.1.tar.gz"
+  sha256 "f8932a035bdc49de360eb3e5652c5c73cf850930787b4f2ef7f5d947b4ed6acd"
   license "MIT"
 
   depends_on arch: :arm64
@@ -17,8 +17,8 @@ class ColdfireMlxServer < Formula
   # can find it via the Homebrew Cellar layout (see app/cli.py:
   # _candidate_notices_paths).
   resource "notices" do
-    url "https://github.com/getcoldfire/mlx-openai-server/releases/download/v0.1.0/NOTICES.txt"
-    sha256 "ca644da3f072603b6cdca870ef8862aeaac32138c46697175fed4ddc0c3e133c"
+    url "https://github.com/getcoldfire/mlx-openai-server/releases/download/v0.1.1/NOTICES.txt"
+    sha256 "9db3cf15b36406a1849df69d9497861b97a1b27f9f5a4a70cd1c48e9a4458d1c"
   end
 
   # We deliberately do NOT enumerate dependencies as `resource` blocks
