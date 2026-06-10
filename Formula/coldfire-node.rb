@@ -44,10 +44,10 @@ end
 class ColdfireNode < Formula
   desc "Coldfire v2 inference daemon for Apple Silicon"
   homepage "https://getcoldfire.com"
-  url "https://github.com/getcoldfire/coldfire/releases/download/coldfire-node-v0.1.3/coldfire-node-0.1.3-darwin-arm64.tar.gz",
+  url "https://github.com/getcoldfire/coldfire/releases/download/coldfire-node-v0.1.4/coldfire-node-0.1.4-darwin-arm64.tar.gz",
       using: ColdfireNodeAssetDownloadStrategy
-  version "0.1.3"
-  sha256 "041c441def37bf91876c8036e6abae04a87a3445b94d7686fd7be6585b479d0a"
+  version "0.1.4"
+  sha256 "84f1c15087e6bf0806ba6db8679f3cf41f2a9aaa0b357307d987b3633b20d083"
   license "MIT"
 
   depends_on arch: :arm64
