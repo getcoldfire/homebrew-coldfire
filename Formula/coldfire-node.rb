@@ -1,38 +1,24 @@
 class ColdfireNodeAssetDownloadStrategy < CurlDownloadStrategy
-  # Downloads a release ASSET (the prebuilt tarball uploaded by the
-  # Release coldfire-node GitHub Actions workflow) from a private repo
-  # via the GH API + bearer token. The asset name is embedded in the
-  # formula URL; we resolve it to the API asset endpoint and stream
-  # the binary blob with Accept: application/octet-stream.
+  # Streams a release ASSET from coord-v2's asset-proxy endpoint. The
+  # bearer token (COLDFIRE_INSTALL_TOKEN) is minted at invite-burn time
+  # and validated server-side against the invites DB; coord-v2 uses its
+  # own server-side bot token to fetch the actual binary from the
+  # private getcoldfire/coldfire GitHub releases. Recipients never see
+  # a GitHub token of their own.
   def initialize(url, name, version, **meta)
     super
-    @owner = "getcoldfire"
-    @repo = "coldfire"
-    @tag = "coldfire-node-v#{version}"
     @asset_name = "coldfire-node-#{version}-darwin-arm64.tar.gz"
+    @proxy_url = "https://coordinator.getcoldfire.com/assets/coldfire-node/#{version}/#{@asset_name}"
   end
 
   def _fetch(url:, resolved_url:, timeout:)
-    token = ENV["HOMEBREW_GITHUB_API_TOKEN"]
+    token = ENV["COLDFIRE_INSTALL_TOKEN"]
     raise CurlDownloadStrategyError,
-          "HOMEBREW_GITHUB_API_TOKEN must be set to install this formula." unless token
+          "COLDFIRE_INSTALL_TOKEN must be set. Open a fresh invite link " \
+          "(https://getcoldfire.com/install?code=<your-code>) and re-run " \
+          "the bash command shown — it sets this for the install." unless token
 
-    # 1. Resolve the asset_id from the release-by-tag endpoint.
-    release_url = "https://api.github.com/repos/#{@owner}/#{@repo}/releases/tags/#{@tag}"
-    release_json, = curl_output "--silent",
-                                "--fail",
-                                "--header", "Authorization: Bearer #{token}",
-                                "--header", "Accept: application/vnd.github.v3+json",
-                                release_url
-    require "json"
-    release = JSON.parse(release_json)
-    asset = release.fetch("assets", []).find { |a| a["name"] == @asset_name }
-    raise CurlDownloadStrategyError,
-          "asset #{@asset_name} not found on release #{@tag}" if asset.nil?
-
-    # 2. Stream the asset blob.
-    asset_url = "https://api.github.com/repos/#{@owner}/#{@repo}/releases/assets/#{asset["id"]}"
-    curl_download asset_url,
+    curl_download @proxy_url,
                   "--header", "Authorization: Bearer #{token}",
                   "--header", "Accept: application/octet-stream",
                   "--location",
