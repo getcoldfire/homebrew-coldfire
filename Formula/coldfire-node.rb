@@ -42,12 +42,12 @@ class ColdfireNodeAssetDownloadStrategy < CurlDownloadStrategy
 end
 
 class ColdfireNode < Formula
-  desc "Coldfire v2 distributed inference daemon for Apple Silicon"
+  desc "Coldfire v2 inference daemon for Apple Silicon"
   homepage "https://getcoldfire.com"
-  url "https://github.com/getcoldfire/coldfire/releases/download/coldfire-node-v0.1.0-rc.1/coldfire-node-0.1.0-rc.1-darwin-arm64.tar.gz",
+  url "https://github.com/getcoldfire/coldfire/releases/download/coldfire-node-v0.1.1/coldfire-node-0.1.1-darwin-arm64.tar.gz",
       using: ColdfireNodeAssetDownloadStrategy
-  version "0.1.0-rc.1"
-  sha256 "c2a6b257a5d6b56883bbd83515486abed7b60da86e26a302b7e4ea31341f07bf"
+  version "0.1.1"
+  sha256 "d641551cdf8c19ccba346d0d969494d82d8a597351611c74481036ab71e79092"
   license "MIT"
 
   depends_on arch: :arm64
