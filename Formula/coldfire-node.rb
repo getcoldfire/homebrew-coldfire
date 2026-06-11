@@ -1,10 +1,16 @@
 class ColdfireNodeAssetDownloadStrategy < CurlDownloadStrategy
   # Streams a release ASSET from coord-v2's asset-proxy endpoint. The
-  # bearer token (COLDFIRE_INSTALL_TOKEN) is minted at invite-burn time
-  # and validated server-side against the invites DB; coord-v2 uses its
-  # own server-side bot token to fetch the actual binary from the
-  # private getcoldfire/coldfire GitHub releases. Recipients never see
-  # a GitHub token of their own.
+  # bearer token (HOMEBREW_COLDFIRE_INSTALL_TOKEN) is minted at invite-
+  # burn time and validated server-side against the invites DB; coord-v2
+  # uses its own server-side bot token to fetch the actual binary from
+  # the private getcoldfire/coldfire GitHub releases. Recipients never
+  # see a GitHub token of their own.
+  #
+  # The HOMEBREW_ prefix on the env var is load-bearing: Homebrew
+  # sanitizes the formula execution environment and strips any var
+  # outside its HOMEBREW_* / system allowlist. Names without the prefix
+  # arrive here as nil even when the parent shell exported them. The
+  # install script (coord-v2 routes/install.py) exports the same name.
   def initialize(url, name, version, **meta)
     super
     @asset_name = "coldfire-node-#{version}-darwin-arm64.tar.gz"
@@ -12,11 +18,13 @@ class ColdfireNodeAssetDownloadStrategy < CurlDownloadStrategy
   end
 
   def _fetch(url:, resolved_url:, timeout:)
-    token = ENV["COLDFIRE_INSTALL_TOKEN"]
+    token = ENV["HOMEBREW_COLDFIRE_INSTALL_TOKEN"]
     raise CurlDownloadStrategyError,
-          "COLDFIRE_INSTALL_TOKEN must be set. Open a fresh invite link " \
-          "(https://getcoldfire.com/install?code=<your-code>) and re-run " \
-          "the bash command shown — it sets this for the install." unless token
+          "HOMEBREW_COLDFIRE_INSTALL_TOKEN must be set. Open a fresh invite link " \
+          "(https://getcoldfire.com/install?code=<your-code>) and re-run the " \
+          "curl command from that page — it exports this for the install. If " \
+          "you're seeing this AFTER running the curl from the invite page, " \
+          "email support@getcoldfire.com with the install link." unless token
 
     curl_download @proxy_url,
                   "--header", "Authorization: Bearer #{token}",
