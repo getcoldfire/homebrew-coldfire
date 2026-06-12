@@ -55,7 +55,10 @@ class ColdfireAdmin < Formula
 
   def install
     bin.install "coldfire-admin"
-    system "xattr", "-dr", "com.apple.quarantine", bin/"coldfire-admin"
+    # `system` raises on exit 1 starting in brew 6.0.1, which trips when
+    # com.apple.quarantine isn't present (the common case for curl-downloaded
+    # tarballs). `quiet_system` returns false instead.
+    quiet_system "xattr", "-dr", "com.apple.quarantine", bin/"coldfire-admin"
   end
 
   def caveats
