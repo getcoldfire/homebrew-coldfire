@@ -50,8 +50,12 @@ class ColdfireNode < Formula
   def install
     bin.install "coldfire-node"
     bin.install "coldfire-ctl"
-    system "xattr", "-dr", "com.apple.quarantine", bin/"coldfire-node"
-    system "xattr", "-dr", "com.apple.quarantine", bin/"coldfire-ctl"
+    # Brew downloads via curl, which doesn't set com.apple.quarantine, so
+    # these xattr removes are typically no-ops. `system` raises on exit 1
+    # ("No such xattr") starting in brew 6.0.1; `quiet_system` returns
+    # false instead, keeping the install robust if the attr is absent.
+    quiet_system "xattr", "-dr", "com.apple.quarantine", bin/"coldfire-node"
+    quiet_system "xattr", "-dr", "com.apple.quarantine", bin/"coldfire-ctl"
   end
 
   def caveats
