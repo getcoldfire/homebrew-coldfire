@@ -44,10 +44,10 @@ end
 class ColdfireAdmin < Formula
   desc "Operator CLI for the Coldfire coordinator (admin endpoints)"
   homepage "https://getcoldfire.com"
-  url "https://github.com/getcoldfire/coldfire/releases/download/coldfire-admin-v0.1.1/coldfire-admin-0.1.1-darwin-arm64.tar.gz",
+  url "https://github.com/getcoldfire/coldfire/releases/download/coldfire-admin-v0.1.2/coldfire-admin-0.1.2-darwin-arm64.tar.gz",
       using: ColdfireAdminAssetDownloadStrategy
-  version "0.1.1"
-  sha256 "9f38447e88e6c72c4fa07cac564ec8a6f83aaa6ff15cda3fd28cf6ff1da3ccee"
+  version "0.1.2"
+  sha256 "de117221d8de7cb7dbeafa323b3206de43aa80cde14183baf568cf1300573faf"
   license "MIT"
 
   depends_on arch: :arm64
