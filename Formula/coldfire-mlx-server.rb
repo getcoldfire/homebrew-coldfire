@@ -39,21 +39,32 @@ class ColdfireMlxServer < Formula
     # sdists for that pipeline to consume.
     virtualenv_create(libexec, "python3.12")
 
-    # Homebrew's virtualenv_create runs with --without-pip; bootstrap
-    # pip so we can drive the install ourselves from requirements.lock.
-    system libexec/"bin/python", "-m", "ensurepip"
+    # Homebrew's virtualenv_create runs with --without-pip AND
+    # --system-site-packages. The latter exposes the system python's
+    # pip via site-packages, which makes `python -m ensurepip` skip
+    # installing a venv-local bin/pip ("Requirement already satisfied").
+    # `--upgrade` forces ensurepip to drop a pip wheel into the venv
+    # regardless. Without it, every subsequent `bin/pip` invocation
+    # fails with "Failed to execute" because the file doesn't exist.
+    system libexec/"bin/python", "-m", "ensurepip", "--upgrade"
+
+    # Drive all pip calls through `python -m pip` rather than the
+    # bin/pip shim. The shim is fragile when --system-site-packages is
+    # on (see above); `python -m pip` always resolves to the venv's
+    # pip module regardless of where the shim ended up.
     system libexec/"bin/python", "-m", "pip", "install", "--upgrade",
            "--no-cache-dir", "pip"
 
     # Install pinned runtime deps from the in-tarball lock file. This
     # mirrors the environment the pip-licenses audit signs off on per
     # release (Phase 8b CI / Phase 8a Makefile).
-    system libexec/"bin/pip", "install", "--no-cache-dir",
+    system libexec/"bin/python", "-m", "pip", "install", "--no-cache-dir",
            "-r", buildpath/"requirements.lock"
 
     # Install the package itself without re-resolving deps (already
     # pinned above). --no-deps keeps the resolved versions intact.
-    system libexec/"bin/pip", "install", "--no-cache-dir", "--no-deps", buildpath
+    system libexec/"bin/python", "-m", "pip", "install", "--no-cache-dir",
+           "--no-deps", buildpath
 
     # Wire up the console script on PATH. The package's [project.scripts]
     # entry installs at <libexec>/bin/coldfire-mlx-server.
