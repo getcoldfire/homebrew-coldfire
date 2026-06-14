@@ -1,48 +1,12 @@
-class ColdfireNodeAssetDownloadStrategy < CurlDownloadStrategy
-  # Streams a release ASSET from coord-v2's asset-proxy endpoint. The
-  # bearer token (HOMEBREW_COLDFIRE_INSTALL_TOKEN) is minted at invite-
-  # burn time and validated server-side against the invites DB; coord-v2
-  # uses its own server-side bot token to fetch the actual binary from
-  # the private getcoldfire/coldfire GitHub releases. Recipients never
-  # see a GitHub token of their own.
-  #
-  # The HOMEBREW_ prefix on the env var is load-bearing: Homebrew
-  # sanitizes the formula execution environment and strips any var
-  # outside its HOMEBREW_* / system allowlist. Names without the prefix
-  # arrive here as nil even when the parent shell exported them. The
-  # install script (coord-v2 routes/install.py) exports the same name.
-  def initialize(url, name, version, **meta)
-    super
-    @asset_name = "coldfire-node-#{version}-darwin-arm64.tar.gz"
-    @proxy_url = "https://coordinator.getcoldfire.com/assets/coldfire-node/#{version}/#{@asset_name}"
-  end
-
-  def _fetch(url:, resolved_url:, timeout:)
-    token = ENV["HOMEBREW_COLDFIRE_INSTALL_TOKEN"]
-    raise CurlDownloadStrategyError,
-          "HOMEBREW_COLDFIRE_INSTALL_TOKEN must be set. Open a fresh invite link " \
-          "(https://getcoldfire.com/install?code=<your-code>) and re-run the " \
-          "curl command from that page — it exports this for the install. If " \
-          "you're seeing this AFTER running the curl from the invite page, " \
-          "email support@getcoldfire.com with the install link." unless token
-
-    curl_download @proxy_url,
-                  "--header", "Authorization: Bearer #{token}",
-                  "--header", "Accept: application/octet-stream",
-                  "--location",
-                  to: temporary_path,
-                  timeout: timeout
-  end
-end
-
 class ColdfireNode < Formula
   desc "Coldfire v2 inference daemon for Apple Silicon"
   homepage "https://getcoldfire.com"
-  url "https://github.com/getcoldfire/coldfire/releases/download/coldfire-node-v0.1.15/coldfire-node-0.1.15-darwin-arm64.tar.gz",
-      using: ColdfireNodeAssetDownloadStrategy
+  url "https://github.com/getcoldfire/homebrew-coldfire/releases/download/coldfire-node-v0.1.15/coldfire-node-0.1.15-darwin-arm64.tar.gz"
   version "0.1.15"
   sha256 "8e2c76d5761f6d3d3e9c2e06e065b7b698c19899858d3cd08a64a9d0c91389a7"
-  license "MIT"
+  # Proprietary: see LICENSE inside the tarball. The shipped binaries are
+  # not open source even though the formula is distributed via a public tap.
+  license :cannot_represent
 
   depends_on arch: :arm64
   depends_on macos: :ventura
@@ -62,8 +26,8 @@ class ColdfireNode < Formula
     <<~EOS
       Before running, configure Coldfire with an invite code or interactively:
 
-        coldfire-ctl setup --install-nonce <nonce>     # nonce path (auto-approve)
-        coldfire-ctl setup                              # interactive (manual approval)
+        coldfire-ctl setup --invite-code <code>     # invite path (auto-approve)
+        coldfire-ctl setup                          # interactive (manual approval)
 
       The setup wizard writes ~/.coldfire/config.yaml and the launchd plist
       at ~/Library/LaunchAgents/com.getcoldfire.node.plist, then bootstraps
