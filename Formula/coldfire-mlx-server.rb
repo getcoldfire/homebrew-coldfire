@@ -1,8 +1,8 @@
 class ColdfireMlxServer < Formula
   desc "Renamed: see coldfire-inference-server"
   homepage "https://github.com/getcoldfire/inference-server"
-  url "https://github.com/getcoldfire/inference-server/archive/refs/tags/v0.4.0.tar.gz"
-  sha256 "54c22d6a1fd509e996bbb1969cce4e56104513914da82cbe464deb0ab3d414b3"
+  url "https://github.com/getcoldfire/inference-server/archive/refs/tags/v0.4.1.tar.gz"
+  sha256 "75bd2e93737ca9eaf76ba27482ae436da2d715ab1fc26d22528c55501ad4ff0a"
   license "MIT"
 
   disable! date: "2026-06-15",
