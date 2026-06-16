@@ -33,11 +33,21 @@ class ColdfireNode < Formula
   # `coldfire-ctl restart` invocation handles the launchd job-domain
   # teardown race that breaks the bare bootstrap.
   def post_install
-    return if ENV["COLDFIRE_NO_AUTO_RESTART"]
-    socket = File.expand_path("~/.coldfire/daemon.sock")
-    return unless File.socket?(socket)
-    ohai "Restarting coldfire-node so the new binary takes effect (set COLDFIRE_NO_AUTO_RESTART=1 to opt out)"
-    quiet_system bin/"coldfire-ctl", "restart"
+    ohai "coldfire-node post_install: checking for a running daemon"
+    if ENV["COLDFIRE_NO_AUTO_RESTART"]
+      ohai "  COLDFIRE_NO_AUTO_RESTART set, skipping auto-restart"
+      return
+    end
+    # Dir.home reads the user's passwd entry rather than ENV["HOME"], so
+    # this works correctly even when Homebrew's install sandbox has
+    # mutated HOME (which it does on bottle pours).
+    socket = File.join(Dir.home, ".coldfire", "daemon.sock")
+    unless File.socket?(socket)
+      ohai "  no daemon socket at #{socket}, nothing to restart"
+      return
+    end
+    ohai "  daemon detected — running `coldfire-ctl restart` (set COLDFIRE_NO_AUTO_RESTART=1 to opt out)"
+    system bin/"coldfire-ctl", "restart"
   end
 
   def caveats
