@@ -22,54 +22,26 @@ class ColdfireNode < Formula
     quiet_system "xattr", "-dr", "com.apple.quarantine", bin/"coldfire-ctl"
   end
 
-  # post_install fires after every install / upgrade. If a daemon is
-  # currently running on this user, automatically restart it so the new
-  # binary takes effect — operators no longer need to remember the
-  # `coldfire-ctl stop && launchctl bootstrap …` dance after every
-  # `brew upgrade coldfire-node`. Detection is purely a socket-existence
-  # check (~/.coldfire/daemon.sock); if no daemon is running, this is a
-  # silent no-op. Opt out by setting COLDFIRE_NO_AUTO_RESTART=1 in the
-  # brew-invoking shell (also gets passed through Homebrew). The
-  # `coldfire-ctl restart` invocation handles the launchd job-domain
-  # teardown race that breaks the bare bootstrap.
+  # post_install fires after every install / upgrade. We can't actually
+  # run `coldfire-ctl restart` from here — Homebrew's install sandbox
+  # blocks launchctl bootstrap calls, and detached subshells get reaped
+  # with the sandbox. What we CAN do is detect a running daemon and
+  # print an unmissable recipe so the operator knows the one command
+  # to run. The recipe is a single line; in practice it's what zero-
+  # touch would have given them anyway.
   def post_install
-    if ENV["COLDFIRE_NO_AUTO_RESTART"]
-      ohai "coldfire-node post_install: COLDFIRE_NO_AUTO_RESTART set, skipping auto-restart"
-      return
-    end
-    # Homebrew's install sandbox mutates ENV["HOME"] (and therefore
-    # Dir.home / ~ expansion) to a tmpdir like
-    # /private/tmp/coldfire-node-postinstall-…  — operator's real home
-    # comes from the passwd entry for the running uid, which the
-    # sandbox doesn't touch.
+    return if ENV["COLDFIRE_NO_AUTO_RESTART"]
     require "etc"
+    # Etc.getpwuid(Process.uid).dir reads the operator's real home from
+    # the passwd entry. Dir.home / ~ expansion both go through
+    # ENV["HOME"], which Homebrew's install sandbox rewrites to a
+    # /private/tmp/coldfire-node-postinstall-… tmpdir.
     home = Etc.getpwuid(Process.uid).dir
     socket = File.join(home, ".coldfire", "daemon.sock")
-    unless File.socket?(socket)
-      # Silent no-op — most installs are first-time (no daemon yet) or
-      # CI-style (no operator daemon to bother).
-      return
-    end
-    ohai "Restarting coldfire-node in the background so the new binary takes effect (set COLDFIRE_NO_AUTO_RESTART=1 to opt out)"
-    # Homebrew's install sandbox blocks `launchctl bootstrap` from
-    # within the post_install process, so we can't run
-    # `coldfire-ctl restart` synchronously here — the bootout would
-    # succeed and leave the daemon dead. Detach the restart so it
-    # fires AFTER post_install (and the sandbox) exits.
-    #
-    # macOS doesn't have setsid(1), so we use the portable subshell
-    # idiom: `(cmd) &` forks a child subshell, then backgrounds it;
-    # `disown` removes the job from the parent shell's job table so
-    # the child isn't reaped when brew exits. `sleep 2` gives brew
-    # time to finalize the install and tear down the sandbox before
-    # we touch launchd. The < /dev/null bit detaches stdin so brew's
-    # post_install can complete without waiting on a stuck pipe.
-    log = "/tmp/coldfire-node-postinstall-restart.log"
-    cmd = "( sleep 2 && exec env HOME=#{home} #{bin}/coldfire-ctl " \
-          "--socket #{socket} restart ) " \
-          ">#{log} 2>&1 </dev/null & disown"
-    system "/bin/bash", "-c", cmd
-    ohai "  restart log: #{log}"
+    return unless File.socket?(socket)
+    ohai "A coldfire-node daemon is running. Restart it so the new binary takes effect:"
+    ohai "    coldfire-ctl restart"
+    ohai "(`coldfire-ctl restart` is a single-command wrapper around stop + launchctl bootstrap)"
   end
 
   def caveats
@@ -84,9 +56,14 @@ class ColdfireNode < Formula
       the daemon. `coldfire-ctl status` shows daemon + bridge health.
 
       Upgrades:
-        brew upgrade coldfire-node       # restarts a running daemon automatically
-        COLDFIRE_NO_AUTO_RESTART=1 brew upgrade coldfire-node   # skip the restart
-        coldfire-ctl restart             # one-command stop + bootstrap
+        brew upgrade coldfire-node       # then: coldfire-ctl restart
+        coldfire-ctl restart             # one-command stop + launchctl bootstrap
+
+      post_install prints the restart recipe when a daemon is running;
+      auto-execution isn't possible because Homebrew's install sandbox
+      blocks the launchctl bootstrap that restart needs. Suppress the
+      reminder with COLDFIRE_NO_AUTO_RESTART=1 if you handle restarts
+      elsewhere.
 
       To uninstall:
         coldfire-ctl uninstall
