@@ -1,9 +1,9 @@
 class ColdfireNode < Formula
   desc "Coldfire v2 inference daemon for Apple Silicon"
   homepage "https://getcoldfire.com"
-  url "https://github.com/getcoldfire/homebrew-coldfire/releases/download/coldfire-node-v0.1.24/coldfire-node-0.1.24-darwin-arm64.tar.gz"
-  version "0.1.24"
-  sha256 "0e6217f43692fc54bb29fa09ddb025ef6e194b13b378ffc900f4dc3615b23509"
+  url "https://github.com/getcoldfire/homebrew-coldfire/releases/download/coldfire-node-v0.1.25/coldfire-node-0.1.25-darwin-arm64.tar.gz"
+  version "0.1.25"
+  sha256 "19bc5254d568348bc2fc938add7b4e47d6f68b3ed2b937961f402af3e83df1fd"
   # Proprietary: see LICENSE inside the tarball. The shipped binaries are
   # not open source even though the formula is distributed via a public tap.
   license :cannot_represent
