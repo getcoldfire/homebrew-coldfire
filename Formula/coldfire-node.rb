@@ -51,12 +51,16 @@ class ColdfireNode < Formula
       return
     end
     ohai "Restarting coldfire-node so the new binary takes effect (set COLDFIRE_NO_AUTO_RESTART=1 to opt out)"
-    # Pass the operator's real HOME so coldfire-ctl's ~/.coldfire and
-    # ~/Library/LaunchAgents expansions go to the operator's tree, not
-    # the sandbox tmpdir. Pass --socket explicitly as belt-and-suspenders
-    # for the IPC path (the launchctl plist path is derived from the
-    # label inside coldfire-ctl, so HOME has to be right for that too).
-    system({ "HOME" => home }, bin/"coldfire-ctl", "--socket", socket, "restart")
+    # Use env(1) to set HOME instead of Ruby's system-with-env-hash —
+    # Homebrew's wrapped `system` doesn't reliably honor the hash form
+    # (the env literal logs as if it were an argv element). env(1) is
+    # universally available and preserves argv1 verbatim.
+    #
+    # HOME has to be right because coldfire-ctl's launchctl bootstrap
+    # derives the plist path from $HOME/Library/LaunchAgents/<label>.plist
+    # internally. --socket is belt-and-suspenders for the IPC step.
+    system "/usr/bin/env", "HOME=#{home}", bin/"coldfire-ctl",
+           "--socket", socket, "restart"
   end
 
   def caveats
