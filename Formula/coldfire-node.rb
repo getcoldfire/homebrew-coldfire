@@ -47,13 +47,16 @@ class ColdfireNode < Formula
     socket = File.join(home, ".coldfire", "daemon.sock")
     unless File.socket?(socket)
       # Silent no-op — most installs are first-time (no daemon yet) or
-      # CI-style (no operator daemon to bother). The verbose noise was
-      # only useful during initial diagnostics; keeping it on every
-      # fresh install would mislead.
+      # CI-style (no operator daemon to bother).
       return
     end
     ohai "Restarting coldfire-node so the new binary takes effect (set COLDFIRE_NO_AUTO_RESTART=1 to opt out)"
-    system bin/"coldfire-ctl", "restart"
+    # Pass the operator's real HOME so coldfire-ctl's ~/.coldfire and
+    # ~/Library/LaunchAgents expansions go to the operator's tree, not
+    # the sandbox tmpdir. Pass --socket explicitly as belt-and-suspenders
+    # for the IPC path (the launchctl plist path is derived from the
+    # label inside coldfire-ctl, so HOME has to be right for that too).
+    system({ "HOME" => home }, bin/"coldfire-ctl", "--socket", socket, "restart")
   end
 
   def caveats
