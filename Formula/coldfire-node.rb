@@ -33,20 +33,26 @@ class ColdfireNode < Formula
   # `coldfire-ctl restart` invocation handles the launchd job-domain
   # teardown race that breaks the bare bootstrap.
   def post_install
-    ohai "coldfire-node post_install: checking for a running daemon"
     if ENV["COLDFIRE_NO_AUTO_RESTART"]
-      ohai "  COLDFIRE_NO_AUTO_RESTART set, skipping auto-restart"
+      ohai "coldfire-node post_install: COLDFIRE_NO_AUTO_RESTART set, skipping auto-restart"
       return
     end
-    # Dir.home reads the user's passwd entry rather than ENV["HOME"], so
-    # this works correctly even when Homebrew's install sandbox has
-    # mutated HOME (which it does on bottle pours).
-    socket = File.join(Dir.home, ".coldfire", "daemon.sock")
+    # Homebrew's install sandbox mutates ENV["HOME"] (and therefore
+    # Dir.home / ~ expansion) to a tmpdir like
+    # /private/tmp/coldfire-node-postinstall-…  — operator's real home
+    # comes from the passwd entry for the running uid, which the
+    # sandbox doesn't touch.
+    require "etc"
+    home = Etc.getpwuid(Process.uid).dir
+    socket = File.join(home, ".coldfire", "daemon.sock")
     unless File.socket?(socket)
-      ohai "  no daemon socket at #{socket}, nothing to restart"
+      # Silent no-op — most installs are first-time (no daemon yet) or
+      # CI-style (no operator daemon to bother). The verbose noise was
+      # only useful during initial diagnostics; keeping it on every
+      # fresh install would mislead.
       return
     end
-    ohai "  daemon detected — running `coldfire-ctl restart` (set COLDFIRE_NO_AUTO_RESTART=1 to opt out)"
+    ohai "Restarting coldfire-node so the new binary takes effect (set COLDFIRE_NO_AUTO_RESTART=1 to opt out)"
     system bin/"coldfire-ctl", "restart"
   end
 
