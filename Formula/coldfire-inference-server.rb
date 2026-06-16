@@ -4,7 +4,7 @@ class ColdfireInferenceServer < Formula
   desc "License-clean Apple Silicon inference server with OpenAI-compatible API"
   homepage "https://github.com/getcoldfire/inference-server"
   url "https://github.com/getcoldfire/inference-server/archive/refs/tags/v0.4.4.tar.gz"
-  sha256 "e5eb926426775d2db4ef6cfb0b9473be85342ff5aee71c72f9e2585a74491004"
+  sha256 "15dabcb388067d5074bed9184fe9eb4182fbb8f40f5f0b316caec180f65bc39d"
   license "MIT"
 
   depends_on arch: :arm64
