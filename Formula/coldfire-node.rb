@@ -50,17 +50,24 @@ class ColdfireNode < Formula
       # CI-style (no operator daemon to bother).
       return
     end
-    ohai "Restarting coldfire-node so the new binary takes effect (set COLDFIRE_NO_AUTO_RESTART=1 to opt out)"
-    # Use env(1) to set HOME instead of Ruby's system-with-env-hash —
-    # Homebrew's wrapped `system` doesn't reliably honor the hash form
-    # (the env literal logs as if it were an argv element). env(1) is
-    # universally available and preserves argv1 verbatim.
+    ohai "Restarting coldfire-node in the background so the new binary takes effect (set COLDFIRE_NO_AUTO_RESTART=1 to opt out)"
+    # Homebrew's install sandbox blocks `launchctl bootstrap` from
+    # within the post_install process, so we can't run
+    # `coldfire-ctl restart` synchronously here — the bootout would
+    # succeed and leave the daemon dead. Detach the restart so it
+    # fires AFTER post_install (and the sandbox) exits.
     #
-    # HOME has to be right because coldfire-ctl's launchctl bootstrap
-    # derives the plist path from $HOME/Library/LaunchAgents/<label>.plist
-    # internally. --socket is belt-and-suspenders for the IPC step.
-    system "/usr/bin/env", "HOME=#{home}", bin/"coldfire-ctl",
-           "--socket", socket, "restart"
+    # `setsid` decouples the child from brew's process group so brew's
+    # sandbox-cleanup doesn't reap it. `sleep 2` gives brew time to
+    # finalize the install and tear down the sandbox before we touch
+    # launchd. The bash subshell + nohup ensures the chain survives
+    # brew's exit even on shells with funky job-control defaults.
+    log = "/tmp/coldfire-node-postinstall-restart.log"
+    cmd = "setsid bash -c 'sleep 2 && exec env HOME=#{home} " \
+          "#{bin}/coldfire-ctl --socket #{socket} restart' " \
+          ">#{log} 2>&1 </dev/null &"
+    system "/bin/bash", "-c", cmd
+    ohai "  restart log: #{log}"
   end
 
   def caveats
