@@ -57,15 +57,17 @@ class ColdfireNode < Formula
     # succeed and leave the daemon dead. Detach the restart so it
     # fires AFTER post_install (and the sandbox) exits.
     #
-    # `setsid` decouples the child from brew's process group so brew's
-    # sandbox-cleanup doesn't reap it. `sleep 2` gives brew time to
-    # finalize the install and tear down the sandbox before we touch
-    # launchd. The bash subshell + nohup ensures the chain survives
-    # brew's exit even on shells with funky job-control defaults.
+    # macOS doesn't have setsid(1), so we use the portable subshell
+    # idiom: `(cmd) &` forks a child subshell, then backgrounds it;
+    # `disown` removes the job from the parent shell's job table so
+    # the child isn't reaped when brew exits. `sleep 2` gives brew
+    # time to finalize the install and tear down the sandbox before
+    # we touch launchd. The < /dev/null bit detaches stdin so brew's
+    # post_install can complete without waiting on a stuck pipe.
     log = "/tmp/coldfire-node-postinstall-restart.log"
-    cmd = "setsid bash -c 'sleep 2 && exec env HOME=#{home} " \
-          "#{bin}/coldfire-ctl --socket #{socket} restart' " \
-          ">#{log} 2>&1 </dev/null &"
+    cmd = "( sleep 2 && exec env HOME=#{home} #{bin}/coldfire-ctl " \
+          "--socket #{socket} restart ) " \
+          ">#{log} 2>&1 </dev/null & disown"
     system "/bin/bash", "-c", cmd
     ohai "  restart log: #{log}"
   end
