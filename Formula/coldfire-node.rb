@@ -1,9 +1,9 @@
 class ColdfireNode < Formula
   desc "Coldfire v2 inference daemon for Apple Silicon"
   homepage "https://getcoldfire.com"
-  url "https://github.com/getcoldfire/homebrew-coldfire/releases/download/coldfire-node-v0.1.22/coldfire-node-0.1.22-darwin-arm64.tar.gz"
-  version "0.1.22"
-  sha256 "2bbca0aa1c0347435727be94ca8a8ecf2874b1912397fb2fb2b0659bede1c9c3"
+  url "https://github.com/getcoldfire/homebrew-coldfire/releases/download/coldfire-node-v0.1.23/coldfire-node-0.1.23-darwin-arm64.tar.gz"
+  version "0.1.23"
+  sha256 "e0695f9d7205bcc39a4c3a118574f9aa642a0eb2cda0b46f5183eae372ceec27"
   # Proprietary: see LICENSE inside the tarball. The shipped binaries are
   # not open source even though the formula is distributed via a public tap.
   license :cannot_represent
@@ -22,6 +22,24 @@ class ColdfireNode < Formula
     quiet_system "xattr", "-dr", "com.apple.quarantine", bin/"coldfire-ctl"
   end
 
+  # post_install fires after every install / upgrade. If a daemon is
+  # currently running on this user, automatically restart it so the new
+  # binary takes effect — operators no longer need to remember the
+  # `coldfire-ctl stop && launchctl bootstrap …` dance after every
+  # `brew upgrade coldfire-node`. Detection is purely a socket-existence
+  # check (~/.coldfire/daemon.sock); if no daemon is running, this is a
+  # silent no-op. Opt out by setting COLDFIRE_NO_AUTO_RESTART=1 in the
+  # brew-invoking shell (also gets passed through Homebrew). The
+  # `coldfire-ctl restart` invocation handles the launchd job-domain
+  # teardown race that breaks the bare bootstrap.
+  def post_install
+    return if ENV["COLDFIRE_NO_AUTO_RESTART"]
+    socket = File.expand_path("~/.coldfire/daemon.sock")
+    return unless File.socket?(socket)
+    ohai "Restarting coldfire-node so the new binary takes effect (set COLDFIRE_NO_AUTO_RESTART=1 to opt out)"
+    quiet_system bin/"coldfire-ctl", "restart"
+  end
+
   def caveats
     <<~EOS
       Before running, configure Coldfire with an invite code or interactively:
@@ -32,6 +50,11 @@ class ColdfireNode < Formula
       The setup wizard writes ~/.coldfire/config.yaml and the launchd plist
       at ~/Library/LaunchAgents/com.getcoldfire.node.plist, then bootstraps
       the daemon. `coldfire-ctl status` shows daemon + bridge health.
+
+      Upgrades:
+        brew upgrade coldfire-node       # restarts a running daemon automatically
+        COLDFIRE_NO_AUTO_RESTART=1 brew upgrade coldfire-node   # skip the restart
+        coldfire-ctl restart             # one-command stop + bootstrap
 
       To uninstall:
         coldfire-ctl uninstall
