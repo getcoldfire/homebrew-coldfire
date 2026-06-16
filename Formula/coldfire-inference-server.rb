@@ -3,8 +3,8 @@ class ColdfireInferenceServer < Formula
 
   desc "License-clean Apple Silicon inference server with OpenAI-compatible API"
   homepage "https://github.com/getcoldfire/inference-server"
-  url "https://github.com/getcoldfire/inference-server/archive/refs/tags/v0.4.2.tar.gz"
-  sha256 "9cda960a638a40d56a0065a317df316021869c23f4c900050333a6f76ba4d049"
+  url "https://github.com/getcoldfire/inference-server/archive/refs/tags/v0.4.3.tar.gz"
+  sha256 "69be118865a621e307eae6e709efd850bfb5d0067bf13abc37d018c7b0224cc3"
   license "MIT"
 
   depends_on arch: :arm64
@@ -17,8 +17,8 @@ class ColdfireInferenceServer < Formula
   # can find it via the Homebrew Cellar layout (see app/cli.py:
   # _candidate_notices_paths).
   resource "notices" do
-    url "https://github.com/getcoldfire/inference-server/releases/download/v0.4.2/NOTICES.txt"
-    sha256 "20a03979b32f48f359c9b8cc984cae13ad02f1e542041fef6c1cedd5b825f556"
+    url "https://github.com/getcoldfire/inference-server/releases/download/v0.4.3/NOTICES.txt"
+    sha256 "24c4ed225f6ef33bdb325804d3dec88fd897eb5473a7c3fa0785cb74de1e9412"
   end
 
   # We deliberately do NOT enumerate dependencies as `resource` blocks
