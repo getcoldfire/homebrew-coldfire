@@ -1,6 +1,6 @@
 cask "coldfire" do
-  version "0.2.14"
-  sha256 "0af487d0e3e27b8adfa8ed8a756e6062919889be047a12b8d5088e64317d2a93"
+  version "0.2.15"
+  sha256 "53cee955b4785f3df0c7d3a6c793d3b8a36ea6969a053f368500df22c58b4bcb"
 
   url "https://dl.getcoldfire.com/app/Coldfire-#{version}.dmg",
       verified: "dl.getcoldfire.com/app/"
