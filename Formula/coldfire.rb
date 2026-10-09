@@ -31,6 +31,10 @@ class Coldfire < Formula
   license "MIT"
   version "0.2.70"
 
+  disable! date: "2026-10-09",
+           because: "is the v1 CLI for the decommissioned Coldfire v1 platform; " \
+                    "use the Coldfire Mac app instead: brew install --cask getcoldfire/coldfire/coldfire"
+
   depends_on "python@3.13"
   depends_on :macos
 

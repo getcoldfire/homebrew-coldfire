@@ -8,6 +8,10 @@ class ColdfireNode < Formula
   # not open source even though the formula is distributed via a public tap.
   license :cannot_represent
 
+  disable! date: "2026-10-09",
+           because: "is the node daemon for the decommissioned libp2p Coldfire network; " \
+                    "use the Coldfire Mac app instead: brew install --cask getcoldfire/coldfire/coldfire"
+
   depends_on arch: :arm64
   depends_on macos: :ventura
 
